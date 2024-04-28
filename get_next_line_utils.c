@@ -21,16 +21,16 @@ size_t	ft_strlen(const char *s)
 	return (len);
 }
 
-char	*ft_strrchr(const char *s, int c)
+char	*ft_strchr(const char *s, int c)
 {
 	int	i;
 
-	i = ft_strlen(s);
-	while (i >= 0)
+	i = 0;
+	while (i <= (int)ft_strlen(s))
 	{
 		if (s[i] == (char)c)
 			return ((char *)(s + i));
-		i--;
+		i++;
 	}
 	return (0);
 }
@@ -73,4 +73,37 @@ void	*ft_memmove(void *dst, const void *src, size_t len)
 		i--;
 	}
 	return (dst);
+}
+
+size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
+{
+	size_t	src_len;
+	size_t	dst_len;
+	size_t	n;
+
+	src_len = ft_strlen(src);
+	dst_len = ft_strlen(dst);
+	n = 1;
+	while (src[n - 1] && (dst_len + n) < dstsize)
+	{
+		dst[dst_len + n - 1] = src[n - 1];
+		n++;
+	}
+	dst[dst_len + n - 1] = '\0';
+	return (dst_len + src_len);
+}
+
+void	*ft_memset(void *b, int c, size_t len)
+{
+	unsigned char	*p;	
+	size_t			i;
+
+	p = b;
+	i = 0;
+	while (i < len)
+	{
+		p[i] = c;
+		i++;
+	}
+	return (b);
 }
