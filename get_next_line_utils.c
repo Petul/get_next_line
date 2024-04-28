@@ -54,27 +54,6 @@ void	*ft_memcpy(void *dst, const void *src, size_t n)
 	return (dst);
 }
 
-void	*ft_memmove(void *dst, const void *src, size_t len)
-{
-	const unsigned char	*s;	
-	unsigned char		*d;
-	size_t				i;
-
-	if (!dst && !src)
-		return (NULL);
-	if (src > dst)
-		return (ft_memcpy(dst, src, len));
-	d = dst;
-	s = src;
-	i = len;
-	while (i > 0)
-	{
-		d[i - 1] = s[i - 1];
-		i--;
-	}
-	return (dst);
-}
-
 size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
 {
 	size_t	src_len;
