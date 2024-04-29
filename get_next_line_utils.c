@@ -11,6 +11,27 @@
 /* ************************************************************************** */
 #include <stddef.h>
 
+char	*ft_strncat(char *dest, char *src, unsigned int nb)
+{
+	char			*orig;
+	unsigned int	i;
+
+	i = 0;
+	orig = dest;
+	while (*dest)
+	{
+		dest++;
+	}
+	while (*src && i < nb)
+	{
+		*dest = *src;
+		dest++;
+		src++;
+		i++;
+	}
+	*dest = '\0';
+	return (orig);
+}
 size_t	ft_strlen(const char *s)
 {
 	size_t	len;
