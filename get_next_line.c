@@ -71,18 +71,22 @@ char	*read_until_nl(char *next_line, char *read_buf, int fd)
 		if (!next_line)
 			return (NULL);
 		bytes_read = read_to_buf(fd, read_buf, BUFFER_SIZE);
+		if (bytes_read < 0)
+		{
+			free(next_line);
+			return (NULL);
+		}
 		newline_pos = ft_strchr(read_buf, '\n');
 	}
 	return (next_line);
 }
-
 char	*get_next_line(int fd)
 {
-	static char	read_buf[BUFFER_SIZE + 1]; // Is it allowed to have BUFFER_SIZE  + 1?
+	static char	read_buf[BUFFER_SIZE + 1]; // Is it OK to have BUFFER_SIZE  + 1?
 	char		*next_line;
 	char		*newline_pos;
 
-	if (fd < 0 || BUFFER_SIZE < 1)
+	if (fd < 0 || BUFFER_SIZE < 1 || read(fd, NULL, 0) < 0)
 		return (NULL);
 	next_line = malloc(sizeof(char));
 	next_line[0] = 0;
@@ -90,12 +94,17 @@ char	*get_next_line(int fd)
 	if (!newline_pos)
 	{
 		next_line = read_until_nl(next_line, read_buf, fd);
-		newline_pos = ft_strchr(read_buf, '\n');
-		if (!newline_pos)
+		if (!next_line)
 			return (NULL);
+		newline_pos = ft_strchr(read_buf, '\n');
 	}
+	if (!newline_pos)
+		newline_pos = read_buf + ft_strlen(read_buf);
 	next_line = copy_buf_to_nl(next_line, read_buf, newline_pos - read_buf + 1);
 	if (ft_strlen(next_line) == 0)
+	{
+		free(next_line);
 		return (NULL);
+	}
 	return (next_line);
 }
