@@ -13,17 +13,6 @@
 #include <unistd.h>
 #include "get_next_line.h"
 
-/* Reads bytes from the specified fd and stores them
-* in the buf. Returns amount of bytes read from the fd */
-int	read_to_buf(int fd, char *buf, size_t n_bytes)
-{
-	int	bytes_read;
-
-	bytes_read = read(fd, buf, n_bytes);
-	buf[bytes_read] = '\0';
-	return (bytes_read);
-}
-
 /* Grows the buffer size by n_bytes, initialized the new memory as 0
  * and returns the increased buffer */
 char	*grow_buffer(char *buf, size_t n_bytes)
@@ -47,8 +36,15 @@ char	*grow_buffer(char *buf, size_t n_bytes)
 * unused characters to the start of read_buf */
 char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes)
 {
-	char *new_nl;
+	char	*new_nl;
 
+	if (!next_line)
+	{
+		next_line = malloc(sizeof(char));
+		if (!next_line)
+			return (NULL);
+		next_line[0] = 0;
+	}
 	new_nl = grow_buffer(next_line, n_bytes);
 	if (!new_nl)
 		return (NULL);
@@ -56,12 +52,12 @@ char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes)
 	ft_memcpy(read_buf, read_buf + n_bytes, BUFFER_SIZE - n_bytes);
 	read_buf[BUFFER_SIZE - n_bytes] = 0;
 	return (new_nl);
-	
 }
+
 char	*read_until_nl(char *next_line, char *read_buf, int fd)
 {
-	char *newline_pos;
-	int	bytes_read;
+	char	*newline_pos;
+	int		bytes_read;
 
 	newline_pos = NULL;
 	bytes_read = -1;
@@ -70,26 +66,37 @@ char	*read_until_nl(char *next_line, char *read_buf, int fd)
 		next_line = copy_buf_to_nl(next_line, read_buf, BUFFER_SIZE);
 		if (!next_line)
 			return (NULL);
-		bytes_read = read_to_buf(fd, read_buf, BUFFER_SIZE);
+		bytes_read = read(fd, read_buf, BUFFER_SIZE);
 		if (bytes_read < 0)
 		{
 			free(next_line);
+			*read_buf = 0;
 			return (NULL);
 		}
+		if ((size_t)bytes_read < BUFFER_SIZE)
+			ft_memset(read_buf + (size_t)bytes_read, 0,
+				BUFFER_SIZE - (size_t)bytes_read);
+		read_buf[bytes_read] = '\0';
 		newline_pos = ft_strchr(read_buf, '\n');
 	}
 	return (next_line);
 }
+
+void	*reset_buf(char *buf)
+{
+	*buf = 0;
+	return (NULL);
+}
+
 char	*get_next_line(int fd)
 {
-	static char	read_buf[BUFFER_SIZE + 1]; // Is it OK to have BUFFER_SIZE  + 1?
+	static char	read_buf[BUFFER_SIZE + 1];
 	char		*next_line;
 	char		*newline_pos;
 
 	if (fd < 0 || BUFFER_SIZE < 1 || read(fd, NULL, 0) < 0)
-		return (NULL);
-	next_line = malloc(sizeof(char));
-	next_line[0] = 0;
+		return (reset_buf(read_buf));
+	next_line = NULL;
 	newline_pos = ft_strchr(read_buf, '\n');
 	if (!newline_pos)
 	{
@@ -99,12 +106,12 @@ char	*get_next_line(int fd)
 		newline_pos = ft_strchr(read_buf, '\n');
 	}
 	if (!newline_pos)
-		newline_pos = read_buf + ft_strlen(read_buf);
+		newline_pos = read_buf + ft_strlen(read_buf) - 1;
 	next_line = copy_buf_to_nl(next_line, read_buf, newline_pos - read_buf + 1);
-	if (ft_strlen(next_line) == 0)
+	if (next_line != NULL && ft_strlen(next_line) == 0)
 	{
 		free(next_line);
-		return (NULL);
+		next_line = NULL;
 	}
 	return (next_line);
 }
