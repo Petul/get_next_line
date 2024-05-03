@@ -6,9 +6,10 @@
 /*   By: pleander <pleander@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/26 15:46:10 by pleander          #+#    #+#             */
-/*   Updated: 2024/04/26 16:17:11 by pleander         ###   ########.fr       */
+/*   Updated: 2024/05/03 12:48:25 by pleander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include <stddef.h>
 
 char	*ft_strncat(char *dest, char *src, unsigned int nb)

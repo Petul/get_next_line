@@ -5,13 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: pleander <pleander@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/02 16:13:03 by pleander          #+#    #+#             */
-/*   Updated: 2024/05/02 16:13:08 by pleander         ###   ########.fr       */
+/*   Created: 2024/05/03 12:50:20 by pleander          #+#    #+#             */
+/*   Updated: 2024/05/03 12:50:23 by pleander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 
 # include <stddef.h>
 

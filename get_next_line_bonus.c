@@ -6,24 +6,28 @@
 /*   By: pleander <pleander@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 16:13:32 by pleander          #+#    #+#             */
-/*   Updated: 2024/05/02 16:13:34 by pleander         ###   ########.fr       */
+/*   Updated: 2024/05/03 12:45:46 by pleander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
-#include <sys/syslimits.h>
 #include <unistd.h>
 #include <limits.h>
 #include "get_next_line_bonus.h"
 
-/* Grows the buffer size by n_bytes, initialized the new memory as 0
- * and returns the increased buffer */
-char	*grow_buffer(char *buf, size_t n_bytes)
+/* Grows the size of the passed buffer by n_bytes.
+ *
+ * First the function creates a new buffer which is n_bytes larger than the
+ * buf_size. Then the old buffer is copied to the start of the new buffer.
+ * Finally the old buffer is freed and the new buffer is returned. Returns NULL
+ * in case of error.
+ */
+char	*grow_buffer(char *buf, size_t buf_size, size_t n_bytes)
 {
-	int		len;
+	size_t	len;
 	char	*new_buf;
 
-	len = ft_strlen(buf) + 1 + n_bytes;
+	len = buf_size + n_bytes;
 	new_buf = malloc(sizeof(char) * len);
 	if (!new_buf)
 	{
@@ -35,8 +39,14 @@ char	*grow_buffer(char *buf, size_t n_bytes)
 	return (new_buf);
 }
 
-/* copies remaining characters in read_buf to next_line and moves the 
-* unused characters to the start of read_buf */
+/* Copies the buffer to the next_line buffer and shifts read_buf
+ *
+ * If the next_line buffer has not yet been initialized it is first
+ * initialized. Then the next_line buffer is grown to fit the new data.
+ * Finally, the data from read_buf is concatenated to the next_line and any
+ * possibly remaining characters in the read_buf are moved to the beginning
+ * of read_buf.
+ */
 char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes)
 {
 	char	*new_nl;
@@ -48,7 +58,7 @@ char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes)
 			return (NULL);
 		next_line[0] = 0;
 	}
-	new_nl = grow_buffer(next_line, n_bytes);
+	new_nl = grow_buffer(next_line, ft_strlen(next_line) + 1, n_bytes);
 	if (!new_nl)
 		return (NULL);
 	ft_strncat(new_nl, read_buf, n_bytes);
@@ -57,14 +67,20 @@ char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes)
 	return (new_nl);
 }
 
-char	*read_until_nl(char *next_line, char *read_buf, int fd)
+/* Reads the fd until a newline '\n' character is encountered
+ *
+ * The function keeps appending characters to the next_line buffer until
+ * a newline character is encoutered. At that point the characters up to and
+ * including the newline character are copied to the next_line buffer.
+ * Returns the next_line buffer or NULL if reading fails.
+ */
+char	*read_until_nl(char *next_line, char **nl_pos, char *read_buf, int fd)
 {
-	char	*newline_pos;
 	int		bytes_read;
 
-	newline_pos = NULL;
+	*nl_pos = NULL;
 	bytes_read = -1;
-	while (!newline_pos && bytes_read != 0)
+	while (!(*nl_pos) && bytes_read != 0)
 	{
 		next_line = copy_buf_to_nl(next_line, read_buf, BUFFER_SIZE);
 		if (!next_line)
@@ -80,39 +96,46 @@ char	*read_until_nl(char *next_line, char *read_buf, int fd)
 			ft_memset(read_buf + (size_t)bytes_read, 0,
 				BUFFER_SIZE - (size_t)bytes_read);
 		read_buf[bytes_read] = '\0';
-		newline_pos = ft_strchr(read_buf, '\n');
+		*nl_pos = ft_strchr(read_buf, '\n');
 	}
 	return (next_line);
 }
 
+/* Resets the passed buffer and returs NULL 
+ */
 void	*reset_buf(char *buf)
 {
 	*buf = 0;
 	return (NULL);
 }
 
+/* Gets the next line from an fd
+ *
+ * Reads the next line from a file descriptor. Handles multiple open file
+ * descriptors. Reads from the buffer until a newline is returned and returns
+ * all characters up to that point. Returns NULL if in error is encoutered.
+ */
 char	*get_next_line(int fd)
 {
-	static char	*fd_arr[OPEN_MAX][BUFFER_SIZE + 1];
+	static char	fd_arr[OPEN_MAX][BUFFER_SIZE + 1];
 	char		*next_line;
-	char		*newline_pos;
+	char		*nl_pos;
 
 	if (fd < 0 || fd > OPEN_MAX || BUFFER_SIZE < 1)
 		return (NULL);
 	if (read(fd, NULL, 0) < 0)
-		return (reset_buf((char *)fd_arr[fd]));
+		return (reset_buf(fd_arr[fd]));
 	next_line = NULL;
-	newline_pos = ft_strchr((char *)fd_arr[fd], '\n');
-	if (!newline_pos)
+	nl_pos = ft_strchr(fd_arr[fd], '\n');
+	if (!nl_pos)
 	{
-		next_line = read_until_nl(next_line, (char *)fd_arr[fd], fd);
+		next_line = read_until_nl(next_line, &nl_pos, fd_arr[fd], fd);
 		if (!next_line)
 			return (NULL);
-		newline_pos = ft_strchr((char *)fd_arr[fd], '\n');
 	}
-	if (!newline_pos)
-		newline_pos = (char *)fd_arr[fd] + ft_strlen((char *)fd_arr[fd]) - 1;
-	next_line = copy_buf_to_nl(next_line, (char *)fd_arr[fd], newline_pos - (char *)fd_arr[fd] + 1);
+	if (!nl_pos)
+		nl_pos = fd_arr[fd] + ft_strlen(fd_arr[fd]) - 1;
+	next_line = copy_buf_to_nl(next_line, fd_arr[fd], nl_pos - fd_arr[fd] + 1);
 	if (next_line != NULL && ft_strlen(next_line) == 0)
 	{
 		free(next_line);
