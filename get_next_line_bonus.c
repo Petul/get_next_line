@@ -6,7 +6,7 @@
 /*   By: pleander <pleander@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 16:13:32 by pleander          #+#    #+#             */
-/*   Updated: 2024/05/03 12:45:46 by pleander         ###   ########.fr       */
+/*   Updated: 2024/05/03 13:24:11 by pleander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 #include <unistd.h>
 #include <limits.h>
 #include "get_next_line_bonus.h"
+
+char	*grow_buffer(char *buf, size_t buf_size, size_t n_bytes);
+char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes);
+char	*read_until_nl(char *next_line, char **nl_pos, char *read_buf, int fd);
+void	*reset_buf(char *buf);
+char	*get_next_line(int fd);
 
 /* Grows the size of the passed buffer by n_bytes.
  *

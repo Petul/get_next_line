@@ -6,13 +6,19 @@
 /*   By: pleander <pleander@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/26 14:10:02 by pleander          #+#    #+#             */
-/*   Updated: 2024/05/03 12:45:32 by pleander         ###   ########.fr       */
+/*   Updated: 2024/05/03 13:05:04 by pleander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <unistd.h>
 #include "get_next_line.h"
+
+char	*grow_buffer(char *buf, size_t buf_size, size_t n_bytes);
+char	*copy_buf_to_nl(char *next_line, char *read_buf, size_t n_bytes);
+char	*read_until_nl(char *next_line, char *read_buf, int fd);
+void	*reset_buf(char *buf);
+char	*get_next_line(int fd);
 
 /* Grows the size of the passed buffer by n_bytes.
  *
